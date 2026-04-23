@@ -52,8 +52,8 @@ A `postinstall` check will warn (not fail) if any of these keys is missing.
 import { MyId } from 'rn-myid';
 
 MyId.configure({
-  clientHash: 'MIIBIj...QIDAQAB',
-  clientHashId: '4d5cd848-b271-42b6-809d-7bbaed1e45a1',
+  clientHash: '<YOUR_MYID_CLIENT_HASH>',
+  clientHashId: '<YOUR_MYID_CLIENT_HASH_ID>',
   environment: __DEV__ ? 'debug' : 'production',
 });
 ```
