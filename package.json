@@ -70,14 +70,6 @@
     "release-it": "^17.0.0",
     "typescript": "^5.3.0"
   },
-  "codegenConfig": {
-    "name": "RNMyIdSpec",
-    "type": "modules",
-    "jsSrcsDir": "src",
-    "android": {
-      "javaPackageName": "com.rnmyid"
-    }
-  },
   "react-native-builder-bob": {
     "source": "src",
     "output": "lib",
