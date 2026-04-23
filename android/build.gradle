@@ -47,6 +47,18 @@ repositories {
     maven { url "https://artifactory.aigroup.uz:443/artifactory/myid" }
 }
 
+// Inject the MyID artifactory into the consumer's root project repositories,
+// so :app can resolve the transitive `uz.myid.sdk.capture:...` dep without
+// requiring every consumer to add this repo to their own android/build.gradle.
+// Safe as long as the consumer does not set
+// `dependencyResolutionManagement.repositoriesMode = FAIL_ON_PROJECT_REPOS`
+// in settings.gradle (the default React Native template does not).
+rootProject.allprojects {
+    repositories {
+        maven { url "https://artifactory.aigroup.uz:443/artifactory/myid" }
+    }
+}
+
 dependencies {
     implementation "com.facebook.react:react-android"
 

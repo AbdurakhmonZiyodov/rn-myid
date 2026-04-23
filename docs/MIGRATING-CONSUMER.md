@@ -90,15 +90,17 @@ cd ios && pod install && cd ..
 `android/app/build.gradle`'dan olib tashlang:
 
 ```gradle
-// Maven repo
-maven { url "https://artifactory.aigroup.uz:443/artifactory/myid" }
-
-// Deps
 debugImplementation("uz.myid.sdk.capture:myid-capture-sdk-debug:3.1.5")
 releaseImplementation("uz.myid.sdk.capture:myid-capture-sdk:3.1.5")
 ```
 
-Bular ham endi `rn-myid`'ning `android/build.gradle`'idan transitively keladi.
+Bular endi `rn-myid`'dan transitively keladi. Artifactory maven repo (`https://artifactory.aigroup.uz:443/artifactory/myid`) ham paket tomondan `rootProject.allprojects { repositories { ... } }` orqali avtomatik qo'shiladi — consumer'ning `android/build.gradle`'iga hech narsa yozishga hojat yo'q.
+
+> **Agar `yarn android` build'da `Could not find uz.myid.sdk.capture:...` xatosi chiqsa** — consumer'ning `android/settings.gradle`'ida `dependencyResolutionManagement.repositoriesMode = FAIL_ON_PROJECT_REPOS` yoqilgan bo'lishi mumkin. Bu holda o'sha fayldagi `dependencyResolutionManagement.repositories` blokiga qo'lda qo'shing:
+>
+> ```gradle
+> maven { url "https://artifactory.aigroup.uz:443/artifactory/myid" }
+> ```
 
 ### 3.2. Kotlin fayllar
 
