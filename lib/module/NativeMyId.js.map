@@ -1,1 +1,1 @@
-{"version":3,"names":["TurboModuleRegistry","get"],"sourceRoot":"../../src","sources":["NativeMyId.ts"],"mappings":";;AACA,SAASA,mBAAmB,QAAQ,cAAc;AAelD,eAAeA,mBAAmB,CAACC,GAAG,CAAO,QAAQ,CAAC","ignoreList":[]}
+{"version":3,"names":["TurboModuleRegistry","get"],"sourceRoot":"../../src","sources":["NativeMyId.ts"],"mappings":";;AACA,SAAQA,mBAAmB,QAAO,cAAc;AAShD,eAAeA,mBAAmB,CAACC,GAAG,CAAO,QAAQ,CAAC","ignoreList":[]}

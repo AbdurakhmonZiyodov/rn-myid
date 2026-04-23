@@ -1,1 +1,1 @@
-{"version":3,"names":["MyId","MyIdError"],"sourceRoot":"../../src","sources":["index.ts"],"mappings":";;AAAA,SAASA,IAAI,QAAQ,QAAQ;AAC7B,SAASC,SAAS,QAAQ,UAAU","ignoreList":[]}
+{"version":3,"names":["MyId","MyIdError"],"sourceRoot":"../../src","sources":["index.ts"],"mappings":";;AAAA,SAAQA,IAAI,QAAO,QAAQ;AAC3B,SAAQC,SAAS,QAAO,UAAU","ignoreList":[]}
