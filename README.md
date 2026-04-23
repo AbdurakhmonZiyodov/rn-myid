@@ -11,7 +11,7 @@ React Native wrapper for the Uzbek MyID identification SDK (`uz.myid`). Promise-
 ## Install
 
 ```bash
-yarn add rn-myid@github:AbdurakhmonZiyodov/rn-myid#v1.0.0
+yarn add rn-myid@github:AbdurakhmonZiyodov/rn-myid#v1.0.1
 cd ios && pod install
 ```
 
@@ -49,7 +49,7 @@ A `postinstall` check will warn (not fail) if any of these keys is missing.
 ### 1. Configure once at app bootstrap
 
 ```ts
-import { MyId } from 'rn-myid';
+import {MyId} from 'rn-myid';
 
 MyId.configure({
   clientHash: '<YOUR_MYID_CLIENT_HASH>',
@@ -63,28 +63,28 @@ MyId.configure({
 ### 2. Start a session
 
 ```ts
-import { MyId, MyIdError } from 'rn-myid';
+import {MyId, MyIdError} from 'rn-myid';
 
 try {
-  const { code } = await MyId.start({
-    sessionId,       // from your backend (GetMyIdSessionId)
-    locale: 'uz',    // 'uz' | 'uz-cyrl' | 'ru' | 'en'
+  const {code} = await MyId.start({
+    sessionId, // from your backend (GetMyIdSessionId)
+    locale: 'uz', // 'uz' | 'uz-cyrl' | 'ru' | 'en'
   });
-  await api.syncByMyId({ userId, code });
+  await api.syncByMyId({userId, code});
 } catch (e) {
   if (e instanceof MyIdError && e.kind === 'USER_EXITED') return;
-  showMessage({ type: 'danger', message: (e as Error).message });
+  showMessage({type: 'danger', message: (e as Error).message});
 }
 ```
 
 ### API
 
-| Method | Returns | Notes |
-| --- | --- | --- |
-| `MyId.configure(config)` | `void` | Sets `clientHash`, `clientHashId`, `environment`. Call once at startup. |
-| `MyId.isAvailable()` | `boolean` | `false` on simulators where the native module is absent. |
-| `MyId.isConfigured()` | `boolean` | Helper for guards. |
-| `MyId.start(opts)` | `Promise<MyIdResult>` | Resolves with `{ code, image?, imageFormat? }`. Rejects with `MyIdError`. |
+| Method                   | Returns               | Notes                                                                     |
+| ------------------------ | --------------------- | ------------------------------------------------------------------------- |
+| `MyId.configure(config)` | `void`                | Sets `clientHash`, `clientHashId`, `environment`. Call once at startup.   |
+| `MyId.isAvailable()`     | `boolean`             | `false` on simulators where the native module is absent.                  |
+| `MyId.isConfigured()`    | `boolean`             | Helper for guards.                                                        |
+| `MyId.start(opts)`       | `Promise<MyIdResult>` | Resolves with `{ code, image?, imageFormat? }`. Rejects with `MyIdError`. |
 
 ### `MyIdError.kind`
 
@@ -105,18 +105,57 @@ try {
 ## Development
 
 ```bash
-yarn install
-yarn typecheck
-yarn prepare   # builds lib/ via react-native-builder-bob
+yarn install          # installs deps, sets up husky hooks, builds lib/
+yarn typecheck        # tsc --noEmit
+yarn lint             # ESLint on src/
+yarn lint:fix         # ESLint auto-fix
+yarn format           # Prettier check
+yarn format:fix       # Prettier auto-format
+yarn prepare          # rebuild lib/ via react-native-builder-bob
 ```
 
-Release checklist:
+Staged `.ts` / `.tsx` files are auto-formatted and auto-fixed on commit via husky + lint-staged — you don't need to run prettier/eslint manually before `git commit`.
 
-1. Bump `version` in `package.json`.
-2. `yarn prepare`.
-3. Commit `lib/` on a `release/vX.Y.Z` branch (or use a CI action).
-4. `git tag vX.Y.Z && git push --tags`.
-5. Update consumers' `package.json` tag.
+## Releasing a new version
+
+`release-it` handles the whole dance — version bump, `lib/` rebuild, commit, tag, push — in one command:
+
+```bash
+yarn release            # interactive: prompts for patch / minor / major
+yarn release patch      # 1.0.1 → 1.0.2 (bugfix, doc tweak)
+yarn release minor      # 1.0.1 → 1.1.0 (new API, backward-compatible)
+yarn release major      # 1.0.1 → 2.0.0 (breaking API change)
+yarn release:dry        # dry-run: shows what would happen, changes nothing
+```
+
+**Preconditions enforced by release-it**:
+
+- You are on `main`.
+- Working tree is clean (`git stash` any WIP first).
+- `yarn typecheck` and `yarn lint` pass (these run automatically as `before:init` hooks).
+
+**What happens under the hood**:
+
+1. `release-it` bumps `version` in `package.json`.
+2. `yarn prepare` runs (bob rebuilds `lib/`).
+3. Both changes are committed as `chore: release v${version}`.
+4. Tag `v${version}` is created.
+5. `main` and the tag are pushed to `origin`.
+
+**Then update each consumer**:
+
+```bash
+yarn add rn-myid@github:AbdurakhmonZiyodov/rn-myid#vX.Y.Z
+cd ios && pod install       # iOS only
+```
+
+**Semver cheat sheet**:
+
+| Change | Bump |
+| --- | --- |
+| README typo, internal refactor, bugfix | `patch` |
+| New public method, new optional param, new event | `minor` |
+| Renamed/removed method, signature change, behavior change consumers must adapt to | `major` |
 
 ## License
 

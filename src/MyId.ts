@@ -1,16 +1,11 @@
-import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
+import {NativeEventEmitter, NativeModules, Platform} from 'react-native';
 import NativeMyId from './NativeMyId';
-import { MyIdError } from './errors';
-import type {
-  MyIdConfig,
-  MyIdEnvironment,
-  MyIdResult,
-  MyIdStartOptions,
-} from './types';
+import {MyIdError} from './errors';
+import type {MyIdConfig, MyIdEnvironment, MyIdResult, MyIdStartOptions} from './types';
 
 const LINKING_ERROR =
   `The package 'rn-myid' doesn't seem to be linked. Make sure: \n\n` +
-  Platform.select({ ios: "- You have run 'pod install'\n", default: '' }) +
+  Platform.select({ios: "- You have run 'pod install'\n", default: ''}) +
   '- You rebuilt the app after installing the package\n' +
   '- You are not using Expo Go\n';
 
@@ -41,10 +36,7 @@ function mapLocale(locale: string): 'uz' | 'uz-cyrl' | 'ru' | 'en' {
 
 function configure(config: MyIdConfig): void {
   if (!config.clientHash || !config.clientHashId) {
-    throw new MyIdError(
-      'NOT_CONFIGURED',
-      'MyId.configure requires both clientHash and clientHashId',
-    );
+    throw new MyIdError('NOT_CONFIGURED', 'MyId.configure requires both clientHash and clientHashId');
   }
   currentConfig = {
     environment: 'production',
@@ -69,12 +61,7 @@ function isConfigured(): boolean {
 function start(options: MyIdStartOptions): Promise<MyIdResult> {
   return new Promise<MyIdResult>((resolve, reject) => {
     if (!currentConfig) {
-      reject(
-        new MyIdError(
-          'NOT_CONFIGURED',
-          'MyId.start called before MyId.configure',
-        ),
-      );
+      reject(new MyIdError('NOT_CONFIGURED', 'MyId.start called before MyId.configure'));
       return;
     }
     if (inFlight) {
@@ -97,7 +84,7 @@ function start(options: MyIdStartOptions): Promise<MyIdResult> {
     inFlight = true;
     const emitter = new NativeEventEmitter(native);
     const subs = [
-      emitter.addListener('onSuccess', (event: { code?: string; image?: string }) => {
+      emitter.addListener('onSuccess', (event: {code?: string; image?: string}) => {
         cleanup();
         if (!event?.code) {
           reject(new MyIdError('SDK_ERROR', 'MyId returned empty code'));
@@ -106,26 +93,13 @@ function start(options: MyIdStartOptions): Promise<MyIdResult> {
         resolve({
           code: event.code,
           image: event.image,
-          imageFormat: event.image
-            ? Platform.OS === 'ios'
-              ? 'jpeg'
-              : 'png'
-            : undefined,
+          imageFormat: event.image ? (Platform.OS === 'ios' ? 'jpeg' : 'png') : undefined,
         });
       }),
-      emitter.addListener(
-        'onError',
-        (event: { message?: string; code?: number }) => {
-          cleanup();
-          reject(
-            new MyIdError(
-              'SDK_ERROR',
-              event?.message ?? 'MyId SDK error',
-              event?.code,
-            ),
-          );
-        },
-      ),
+      emitter.addListener('onError', (event: {message?: string; code?: number}) => {
+        cleanup();
+        reject(new MyIdError('SDK_ERROR', event?.message ?? 'MyId SDK error', event?.code));
+      }),
       emitter.addListener('onUserExited', () => {
         cleanup();
         reject(new MyIdError('USER_EXITED', 'User cancelled MyId session'));
@@ -134,7 +108,7 @@ function start(options: MyIdStartOptions): Promise<MyIdResult> {
 
     const cleanup = () => {
       inFlight = false;
-      subs.forEach((s) => s.remove());
+      subs.forEach(s => s.remove());
     };
 
     try {
@@ -147,9 +121,7 @@ function start(options: MyIdStartOptions): Promise<MyIdResult> {
       );
     } catch (e: any) {
       cleanup();
-      reject(
-        new MyIdError('SDK_ERROR', e?.message ?? 'Failed to start MyId session'),
-      );
+      reject(new MyIdError('SDK_ERROR', e?.message ?? 'Failed to start MyId session'));
     }
   });
 }

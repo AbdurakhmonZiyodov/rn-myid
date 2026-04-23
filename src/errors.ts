@@ -1,9 +1,4 @@
-export type MyIdErrorKind =
-  | 'NOT_CONFIGURED'
-  | 'UNAVAILABLE'
-  | 'ALREADY_RUNNING'
-  | 'USER_EXITED'
-  | 'SDK_ERROR';
+export type MyIdErrorKind = 'NOT_CONFIGURED' | 'UNAVAILABLE' | 'ALREADY_RUNNING' | 'USER_EXITED' | 'SDK_ERROR';
 
 export class MyIdError extends Error {
   readonly kind: MyIdErrorKind;

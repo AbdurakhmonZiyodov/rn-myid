@@ -27,8 +27,14 @@
   ],
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "prepare": "bob build",
-    "postinstall": "node ./scripts/postinstall-check.js || true"
+    "lint": "eslint . --ext .ts,.tsx",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "format": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,md}\" \"*.md\"",
+    "format:fix": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,md}\" \"*.md\"",
+    "prepare": "bob build && husky",
+    "postinstall": "node ./scripts/postinstall-check.js || true",
+    "release": "release-it",
+    "release:dry": "release-it --dry-run"
   },
   "keywords": [
     "react-native",
@@ -50,10 +56,18 @@
     "react-native": ">=0.76.0"
   },
   "devDependencies": {
+    "@react-native/eslint-config": "0.80.3",
     "@types/react": "^18.2.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.57.0",
+    "husky": "^9.0.0",
+    "lint-staged": "^15.0.0",
+    "prettier": "^3.0.0",
     "react": "18.3.1",
     "react-native": "0.80.3",
     "react-native-builder-bob": "^0.32.0",
+    "release-it": "^17.0.0",
     "typescript": "^5.3.0"
   },
   "codegenConfig": {
@@ -77,5 +91,34 @@
         }
       ]
     ]
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.{js,jsx,json,md}": [
+      "prettier --write"
+    ]
+  },
+  "release-it": {
+    "hooks": {
+      "before:init": ["yarn typecheck", "yarn lint"],
+      "after:bump": "yarn prepare"
+    },
+    "git": {
+      "commitMessage": "chore: release v${version}",
+      "tagName": "v${version}",
+      "requireBranch": "main",
+      "requireCleanWorkingDir": true,
+      "addUntrackedFiles": true,
+      "push": true
+    },
+    "github": {
+      "release": false
+    },
+    "npm": {
+      "publish": false
+    }
   }
 }
