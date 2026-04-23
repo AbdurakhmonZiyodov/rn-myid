@@ -10,6 +10,4 @@ RCT_EXTERN_METHOD(start:(NSString *)sessionId
                   environment:(NSString *)environment
                   locale:(NSString *)locale)
 
-RCT_EXTERN_METHOD(isAvailable)
-
 @end

@@ -45,13 +45,7 @@ function configure(config: MyIdConfig): void {
 }
 
 function isAvailable(): boolean {
-  const mod = NativeMyId ?? NativeModules.RNMyId;
-  if (!mod) return false;
-  try {
-    return typeof mod.isAvailable === 'function' ? mod.isAvailable() : true;
-  } catch {
-    return false;
-  }
+  return (NativeMyId ?? NativeModules.RNMyId) != null;
 }
 
 function isConfigured(): boolean {

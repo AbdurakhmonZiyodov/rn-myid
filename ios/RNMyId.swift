@@ -44,11 +44,6 @@ class RNMyId: RCTEventEmitter {
     }
   }
 
-  @objc(isAvailable)
-  func isAvailable() -> NSNumber {
-    return NSNumber(value: true)
-  }
-
   private func mapLocale(_ locale: String) -> MyIdLocale {
     switch locale.lowercased() {
     case "ru": return .russian

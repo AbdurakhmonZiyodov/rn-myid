@@ -44,9 +44,6 @@ class MyIdModule(private val reactContext: ReactApplicationContext) :
     }
 
     @ReactMethod
-    fun isAvailable(): Boolean = true
-
-    @ReactMethod
     fun start(
         sessionId: String,
         clientHash: String,
