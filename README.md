@@ -13,14 +13,14 @@ React Native wrapper for the Uzbek MyID identification SDK (`uz.myid`). Promise-
 ## Install
 
 ```bash
-yarn add rn-myid@github:AbdurakhmonZiyodov/rn-myid#v1.0.3
+yarn add rn-myid@github:AbdurakhmonZiyodov/rn-myid#v1.0.4
 cd ios && pod install
 ```
 
 For private installs via SSH:
 
 ```json
-"rn-myid": "git+ssh://git@github.com/AbdurakhmonZiyodov/rn-myid.git#v1.0.3"
+"rn-myid": "git+ssh://git@github.com/AbdurakhmonZiyodov/rn-myid.git#v1.0.4"
 ```
 
 The Android Artifactory repository (`https://artifactory.aigroup.uz/artifactory/myid`) is declared inside the library, so consumers do **not** need to add it to their `android/build.gradle`.

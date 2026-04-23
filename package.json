@@ -1,6 +1,6 @@
 {
   "name": "rn-myid",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "React Native wrapper for MyID (uz.myid) — Promise-based TurboModule for the 5–8 internal apps.",
   "main": "lib/commonjs/index.js",
   "module": "lib/module/index.js",
