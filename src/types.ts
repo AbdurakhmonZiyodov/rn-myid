@@ -10,7 +10,12 @@ export interface MyIdConfig {
 
 export interface MyIdStartOptions {
   sessionId: string;
-  locale?: MyIdLocale;
+  /**
+   * Recognized values: 'uz' | 'uz-cyrl' | 'cyrl' | 'ru' | 'en'.
+   * Any other value (or unset) falls back to 'uz'.
+   * Typed as string so consumers can pass i18n.language directly.
+   */
+  locale?: MyIdLocale | string;
 }
 
 export interface MyIdResult {
