@@ -54,9 +54,11 @@ import { MyId } from 'rn-myid';
 MyId.configure({
   clientHash: '<YOUR_MYID_CLIENT_HASH>',
   clientHashId: '<YOUR_MYID_CLIENT_HASH_ID>',
-  environment: __DEV__ ? 'debug' : 'production',
+  // `environment` is optional and defaults to 'production'.
 });
 ```
+
+> **Do not tie `environment` to `__DEV__`.** The `'debug'` value selects MyID's own sandbox backend and will immediately dismiss the SDK if your `sessionId` was issued against production (which it almost always is). Leave it as `'production'` unless you specifically have MyID sandbox credentials.
 
 ### 2. Start a session
 
@@ -94,6 +96,7 @@ try {
 
 ## Troubleshooting
 
+- **SDK opens then immediately closes with no `onError`**: most often caused by `environment: 'debug'` against a production `sessionId`. Set `environment: 'production'` (or omit — it's the default) and retry.
 - **"No current activity to start MyId"** (Android): `start()` was called while the activity stack was empty (e.g., during cold start or with the app backgrounded). Wait for `AppState === 'active'`.
 - **`UNAVAILABLE` on iOS**: run `pod install` after adding the dependency and rebuild the app via Xcode / `yarn ios`.
 - **Stale session**: `sessionId` is single-use. Re-fetch a new one for each `start()` call.
