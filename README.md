@@ -11,14 +11,14 @@ React Native wrapper for the Uzbek MyID identification SDK (`uz.myid`). Promise-
 ## Install
 
 ```bash
-yarn add rn-myid@github:AbdurakhmonZiyodov/rn-myid#v1.0.1
+yarn add rn-myid@github:AbdurakhmonZiyodov/rn-myid#v1.0.2
 cd ios && pod install
 ```
 
 For private installs via SSH:
 
 ```json
-"rn-myid": "git+ssh://git@github.com/AbdurakhmonZiyodov/rn-myid.git#v1.0.0"
+"rn-myid": "git+ssh://git@github.com/AbdurakhmonZiyodov/rn-myid.git#v1.0.2"
 ```
 
 The Android Artifactory repository (`https://artifactory.aigroup.uz/artifactory/myid`) is declared inside the library, so consumers do **not** need to add it to their `android/build.gradle`.
@@ -138,9 +138,10 @@ yarn release:dry        # dry-run: shows what would happen, changes nothing
 
 1. `release-it` bumps `version` in `package.json`.
 2. `yarn prepare` runs (bob rebuilds `lib/`).
-3. Both changes are committed as `chore: release v${version}`.
-4. Tag `v${version}` is created.
-5. `main` and the tag are pushed to `origin`.
+3. `scripts/update-readme-version.js` rewrites `rn-myid#vX.Y.Z` snippets in `README.md` to the new version.
+4. All changes are committed as `chore: release v${version}`.
+5. Tag `v${version}` is created.
+6. `main` and the tag are pushed to `origin`.
 
 **Then update each consumer**:
 
@@ -151,10 +152,10 @@ cd ios && pod install       # iOS only
 
 **Semver cheat sheet**:
 
-| Change | Bump |
-| --- | --- |
-| README typo, internal refactor, bugfix | `patch` |
-| New public method, new optional param, new event | `minor` |
+| Change                                                                            | Bump    |
+| --------------------------------------------------------------------------------- | ------- |
+| README typo, internal refactor, bugfix                                            | `patch` |
+| New public method, new optional param, new event                                  | `minor` |
 | Renamed/removed method, signature change, behavior change consumers must adapt to | `major` |
 
 ## License

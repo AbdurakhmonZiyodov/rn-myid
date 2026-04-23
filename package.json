@@ -107,7 +107,10 @@
         "yarn typecheck",
         "yarn lint"
       ],
-      "after:bump": "yarn prepare"
+      "after:bump": [
+        "yarn prepare",
+        "node ./scripts/update-readme-version.js"
+      ]
     },
     "git": {
       "commitMessage": "chore: release v${version}",
