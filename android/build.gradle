@@ -1,0 +1,55 @@
+buildscript {
+    ext.safeExtGet = { prop, fallback ->
+        rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+    }
+
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath("com.android.tools.build:gradle:8.9.1")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${safeExtGet('kotlinVersion', '2.1.20')}")
+    }
+}
+
+apply plugin: "com.android.library"
+apply plugin: "org.jetbrains.kotlin.android"
+
+android {
+    namespace "com.rnmyid"
+
+    compileSdk safeExtGet("compileSdkVersion", 36)
+
+    defaultConfig {
+        minSdk safeExtGet("minSdkVersion", 26)
+        targetSdk safeExtGet("targetSdkVersion", 35)
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+}
+
+repositories {
+    google()
+    mavenCentral()
+    maven { url "https://artifactory.aigroup.uz:443/artifactory/myid" }
+}
+
+dependencies {
+    implementation "com.facebook.react:react-android"
+
+    debugImplementation "uz.myid.sdk.capture:myid-capture-sdk-debug:3.1.5"
+    releaseImplementation "uz.myid.sdk.capture:myid-capture-sdk:3.1.5"
+}
