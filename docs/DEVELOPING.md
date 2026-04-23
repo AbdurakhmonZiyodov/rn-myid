@@ -1,10 +1,10 @@
-# `rn-myid`'ga o'zgartirish kirgizish
+# Working on `rn-myid`
 
-Paketga bug fix, yangi feature yoki SDK versiyasini yangilash uchun retsept.
+The recipe for fixing a bug, shipping a new feature, or bumping the MyID SDK version.
 
 ---
 
-## 0. Birinchi marta setup
+## 0. First-time setup
 
 ```bash
 git clone git@github.com:AbdurakhmonZiyodov/rn-myid.git
@@ -12,106 +12,106 @@ cd rn-myid
 yarn install              # deps + husky hooks + lib/ build
 ```
 
-Agar `yarn install` muvaffaqiyatli ketgan bo'lsa:
+After a successful `yarn install`:
 
-- `.husky/_/` avtomatik yaratilgan (pre-commit hook ishga tushadi)
-- `lib/` qurilgan (git'ga commit qilingan, consumer'lar `yarn add` qilganda yaratish shart emas)
-
----
-
-## 1. O'zgartirish joylari
-
-| Nima o'zgartirmoqchisiz                   | Qaysi fayl                                       |
-| ----------------------------------------- | ------------------------------------------------ |
-| JS API (MyId facade)                      | `src/MyId.ts`                                    |
-| Yangi TypeScript type                     | `src/types.ts`                                   |
-| Error class/kind                          | `src/errors.ts`                                  |
-| TurboModule spec                          | `src/NativeMyId.ts`                              |
-| iOS native kodi                           | `ios/RNMyId.swift`, `ios/RNMyId.mm`              |
-| iOS SDK versiyasi yoki dep                | `rn-myid.podspec`                                |
-| Android native kodi                       | `android/src/main/java/com/rnmyid/MyIdModule.kt` |
-| Android SDK versiyasi, Maven repo, minSdk | `android/build.gradle`                           |
-| Android permission                        | `android/src/main/AndroidManifest.xml`           |
-| README                                    | `README.md`                                      |
-| Release retsepti                          | `docs/RELEASING.md` (bu fayl)                    |
-| ESLint rules                              | `.eslintrc.js`                                   |
-| Prettier stili                            | `.prettierrc.js`                                 |
+- `.husky/_/` is created automatically (pre-commit hook is active).
+- `lib/` is built (it's committed to git, so consumers never have to build it).
 
 ---
 
-## 2. Loop: lokal sinash
+## 1. Where to change what
 
-`rn-myid`'dagi o'zgartirishni consumer loyihada (masalan `rn-my-business-mob`) real sinash uchun `file:` link ishlating:
+| If you want to change…                  | Edit this                                        |
+| --------------------------------------- | ------------------------------------------------ |
+| JS API (MyId facade)                    | `src/MyId.ts`                                    |
+| A TypeScript type                       | `src/types.ts`                                   |
+| Error class / error kind                | `src/errors.ts`                                  |
+| TurboModule spec                        | `src/NativeMyId.ts`                              |
+| iOS native code                         | `ios/RNMyId.swift`, `ios/RNMyId.mm`              |
+| iOS SDK version / pod dependency        | `rn-myid.podspec`                                |
+| Android native code                     | `android/src/main/java/com/rnmyid/MyIdModule.kt` |
+| Android SDK version, maven repo, minSdk | `android/build.gradle`                           |
+| Android permissions                     | `android/src/main/AndroidManifest.xml`           |
+| Public README                           | `README.md`                                      |
+| Release recipe                          | `docs/RELEASING.md`                              |
+| ESLint rules                            | `.eslintrc.js`                                   |
+| Prettier style                          | `.prettierrc.js`                                 |
 
-### Bir marta setup
+---
+
+## 2. Local dev loop
+
+To test a change in a consumer project (e.g. `rn-my-business-mob`) without publishing a new tag, use a `file:` link:
+
+### One-time setup
 
 ```bash
 cd /path/to/rn-my-business-mob
 yarn add "rn-myid@file:/Users/a.ziyodovbrb-tech.uz/Desktop/works/react-native-myid"
 ```
 
-Bu `package.json`'da:
+That writes this into `package.json`:
 
 ```json
 "rn-myid": "file:/Users/.../react-native-myid"
 ```
 
-qatorini yaratadi. Yarn har `yarn install` paytida paketni lokal papkadan oladi.
+From then on, every `yarn install` in the consumer picks the package straight from your local folder.
 
-### Sikl
+### Dev loop
 
-1. `rn-myid/src/...`'da o'zgartirish
-2. `cd rn-myid && yarn prepare` — lib/ qayta quriladi
-3. `cd rn-my-business-mob && yarn install` yoki lokal linkni majburan yangilash uchun:
+1. Edit files in `rn-myid/src/...`.
+2. `cd rn-myid && yarn prepare` — `lib/` gets rebuilt.
+3. `cd rn-my-business-mob && yarn install`, or to force-refresh the local link:
    ```bash
    rm -rf node_modules/rn-myid
    yarn install
    ```
-4. iOS uchun qo'shimcha:
+4. iOS only:
    ```bash
    cd ios && pod install && cd ..
    ```
-5. App'ni rebuild: `yarn ios` yoki `yarn android`.
+5. Rebuild the app: `yarn ios` or `yarn android`.
 
-### Native kod o'zgarishi
+### Native code changes
 
-Native (Swift/Kotlin) o'zgartirgan bo'lsangiz Metro reload yetarli emas — **to'liq rebuild** kerak. iOS'da Xcode'ni tozalab (Shift+Cmd+K) qayta quring.
+If you touched Swift / Kotlin, Metro reload is not enough — you need a **full rebuild**. On iOS, clean the Xcode build (Shift+Cmd+K) first.
 
-### Sikl tugagach
+### Going back to a real tag
 
-Real release qilmoqchi bo'lsangiz:
+When you're ready to ship the change as a version:
 
 ```bash
 cd /path/to/rn-my-business-mob
 yarn add "rn-myid@github:AbdurakhmonZiyodov/rn-myid#vX.Y.Z"
 ```
 
-(lokal `file:` linkni rasmiy tag'ga almashtiring)
+(swap the `file:` link for the official tag)
 
 ---
 
 ## 3. Pre-commit hooks
 
-Har `git commit` qilganda husky avtomatik ishga tushadi:
+Every `git commit` runs husky automatically:
 
-- `.ts` / `.tsx` fayllar → `prettier --write` + `eslint --fix`
-- `.js`/`.jsx`/`.json`/`.md` fayllar → `prettier --write`
+- `.ts` / `.tsx` files → `prettier --write` + `eslint --fix`
+- `.js` / `.jsx` / `.json` / `.md` files → `prettier --write`
 
-Eslint xato bo'lib, auto-fix qila olmasa — commit to'xtaydi. Xatoni qo'lda tuzating va qayta commit qiling.
+If ESLint finds something it can't auto-fix, the commit aborts. Fix the error by hand and retry.
 
-Husky'ni o'chirishga **hojat yo'q**. Agar emergency bo'lsa:
+**Don't turn husky off.** In emergencies you can bypass it:
 
 ```bash
 git commit --no-verify -m "..."
 ```
 
-Lekin bundan qochishga harakat qiling — staged kodni toza saqlash husky'ning vazifasi.
+…but avoid it — keeping staged code clean is husky's job.
 
 ---
 
-## 4. Native SDK versiyasini yangilash
+## 4. Bumping the native SDK version
 
-MyID SDK yangilansa (masalan iOS `3.1.3 → 3.2.0`):
+When MyID releases a new SDK (e.g. iOS `3.1.3 → 3.2.0`):
 
 ### iOS
 
@@ -130,77 +130,77 @@ debugImplementation("uz.myid.sdk.capture:myid-capture-sdk-debug:3.2.0")
 releaseImplementation("uz.myid.sdk.capture:myid-capture-sdk:3.2.0")
 ```
 
-So'ng:
+Then:
 
-1. Consumer loyihada `cd ios && pod install` va `./gradlew :app:assembleDebug` bilan build yashil bo'lishini tekshiring.
-2. Real qurilmada MyID flow'ni sinang (ayniqsa camera + doc capture).
-3. Agar SDK breaking change chiqargan bo'lsa → **`major` bump**. Aks holda `patch` yoki `minor`.
+1. In a consumer project, run `cd ios && pod install` and `./gradlew :app:assembleDebug` — both should be green.
+2. Smoke-test the MyID flow on a real device (camera + document capture especially).
+3. If the SDK ships a breaking change, cut a **`major`** release. Otherwise `patch` or `minor`.
 
 ---
 
-## 5. Yangi TypeScript type qo'shish
+## 5. Adding a TypeScript type
 
-Misol: `MyIdResult`'ga `issuedAt: string` qo'shmoqchisiz.
+Example: you want to expose `issuedAt: string` on `MyIdResult`.
 
-1. `src/types.ts`'da:
+1. `src/types.ts`:
    ```ts
    export interface MyIdResult {
      code: string;
      image?: string;
      imageFormat?: 'jpeg' | 'png';
-     issuedAt?: string; // ← yangi
+     issuedAt?: string; // ← new
    }
    ```
-2. `src/MyId.ts`'ning `onSuccess` emitterida qiymatni uzatish (agar native layer beradigan bo'lsa):
+2. `src/MyId.ts` — pass it through the `onSuccess` resolver (if the native layer provides it):
    ```ts
    resolve({
      code: event.code,
      image: event.image,
-     issuedAt: event.issuedAt,    // ← yangi
-     ...
+     issuedAt: event.issuedAt, // ← new
+     // ...
    });
    ```
-3. Native (iOS Swift, Android Kotlin)'da `onSuccess` event payload'iga `issuedAt` qo'shing.
-4. `yarn typecheck && yarn lint && yarn prepare` — hammasi yashil.
-5. `yarn release minor` (yangi optional field — backward compatible).
+3. Update the native side (iOS Swift, Android Kotlin) to include `issuedAt` in the `onSuccess` event payload.
+4. `yarn typecheck && yarn lint && yarn prepare` — everything stays green.
+5. `yarn release minor` — it's a new optional field, so backwards compatible.
 
 ---
 
-## 6. Yangi error kind qo'shish
+## 6. Adding an error kind
 
 `src/errors.ts`:
 
 ```ts
-export type MyIdErrorKind = 'NOT_CONFIGURED' | 'UNAVAILABLE' | 'ALREADY_RUNNING' | 'USER_EXITED' | 'SDK_ERROR' | 'NETWORK_ERROR'; // ← yangi
+export type MyIdErrorKind = 'NOT_CONFIGURED' | 'UNAVAILABLE' | 'ALREADY_RUNNING' | 'USER_EXITED' | 'SDK_ERROR' | 'NETWORK_ERROR'; // ← new
 ```
 
-`src/MyId.ts`'ning native error handler'ida tegishli switch qo'shing.
+Add the corresponding branch in the native error handler inside `src/MyId.ts`.
 
 `yarn release minor`.
 
 ---
 
-## 7. Breaking change
+## 7. Breaking changes
 
-Misol: `MyId.start` signatura o'zgardi (`locale` → `lang`).
+Example: `MyId.start` renames its option from `locale` to `lang`.
 
-1. Kod o'zgartirish
-2. README'ni yangilash — consumer migratsiya retsepti qo'shish
-3. `docs/MIGRATING-CONSUMER.md` ni yangilash
-4. `yarn release major`
-5. Barcha consumer loyihalarda bir marta migrate qilish kerak bo'ladi
+1. Change the code.
+2. Update `README.md` — include a migration snippet for consumers.
+3. Update `docs/MIGRATING-CONSUMER.md`.
+4. `yarn release major`.
+5. Every consumer project needs a one-time code update.
 
 ---
 
-## Muammolar
+## Troubleshooting
 
-### "husky: command not found" `yarn install` paytida
+### "husky: command not found" during `yarn install`
 
-`yarn install --ignore-scripts` bilan ishlatmaganingizga ishonch hosil qiling. Husky `prepare` lifecycle hook'ida o'rnatiladi.
+Make sure you didn't run `yarn install --ignore-scripts`. Husky installs itself via the `prepare` lifecycle hook.
 
-### `yarn prepare` xato: "tsc: command not found"
+### `yarn prepare` fails with "tsc: command not found"
 
-`yarn install` qilmagansiz yoki node_modules buzilgan:
+Either you didn't run `yarn install`, or `node_modules` is corrupted:
 
 ```bash
 rm -rf node_modules yarn.lock
@@ -209,8 +209,8 @@ yarn install
 
 ### iOS build: "MyIdSDK not found"
 
-`cd ios && pod install` — pod sync qilinmagan.
+`cd ios && pod install` — pods are out of sync.
 
 ### Android build: "Maven repo unreachable"
 
-`artifactory.aigroup.uz`'ga kira olmayapsiz (VPN yoki network). Internet tekshiring.
+You can't reach `artifactory.aigroup.uz` (VPN, office network, etc.). Check connectivity.

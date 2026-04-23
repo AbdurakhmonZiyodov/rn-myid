@@ -6,7 +6,7 @@ React Native wrapper for the Uzbek MyID identification SDK (`uz.myid`). Promise-
 - Android: `uz.myid.sdk.capture:myid-capture-sdk(-debug):3.1.5`
 - React Native: ≥ 0.76 (new architecture supported)
 
-> **O'zbekcha qo'llanma** `docs/` papkasida: [releasing](./docs/RELEASING.md) · [consumer migration](./docs/MIGRATING-CONSUMER.md) · [developing](./docs/DEVELOPING.md)
+> **Maintainer guides** live in `docs/`: [releasing](./docs/RELEASING.md) · [consumer migration](./docs/MIGRATING-CONSUMER.md) · [developing](./docs/DEVELOPING.md)
 
 ---
 

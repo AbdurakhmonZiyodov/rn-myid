@@ -1,14 +1,14 @@
-# Yangi loyihani `rn-myid`'ga ko'chirish
+# Migrating a project to `rn-myid`
 
-`rn-myid` ishxonadagi 5–8 ta RN loyihalarning har birida MyID kodini bitta joyga birlashtirish uchun yaratilgan. Bu hujjat yangi consumer loyihani (masalan `my-order-app`, `chatxo-mobile` va h.k.) ichki MyID native modulidan `rn-myid` paketiga ko'chirish retseptini beradi.
+`rn-myid` consolidates the MyID native module code that each of the 5–8 internal RN apps used to carry inline. This guide walks through porting a new consumer project (e.g. `my-order-app`, `chatxo-mobile`, …) from its own copy-pasted native module to the shared package.
 
 ---
 
-## 0. Tayyorgarlik
+## 0. Prerequisites
 
-Loyiha **React Native ≥ 0.76.9** bo'lishi kerak, **new architecture yoqilgan** bo'lishi tavsiya etiladi (`newArchEnabled=true`). Eski RN versiyalarida ham ishlashi mumkin, lekin sinab ko'rilmagan.
+The project needs **React Native ≥ 0.76.9**, ideally with **new architecture enabled** (`newArchEnabled=true`). Older RN versions may work but haven't been verified.
 
-Migratsiya uchun alohida branch oching:
+Open a dedicated branch for the migration:
 
 ```bash
 git checkout -b feat/migrate-to-rn-myid
@@ -16,42 +16,42 @@ git checkout -b feat/migrate-to-rn-myid
 
 ---
 
-## 1. Paketni o'rnatish
+## 1. Install the package
 
 ```bash
-yarn add rn-myid@github:AbdurakhmonZiyodov/rn-myid#v1.0.2
+yarn add rn-myid@github:AbdurakhmonZiyodov/rn-myid#v1.0.5
 cd ios && pod install && cd ..
 ```
 
-> `#v1.0.2` — eng so'nggi tag. https://github.com/AbdurakhmonZiyodov/rn-myid/tags
+> `#v1.0.5` is the latest tag. See the full list: https://github.com/AbdurakhmonZiyodov/rn-myid/tags
 
 ---
 
-## 2. Eski iOS native kodni olib tashlash
+## 2. Remove the legacy iOS native code
 
 ### 2.1. Podfile
 
-`ios/Podfile`'dan quyidagi qatorni olib tashlang:
+Delete this line from `ios/Podfile`:
 
 ```ruby
 pod 'MyIdSDK', '~> 3.1.3'
 ```
 
-MyIdSDK endi `rn-myid` orqali transitive pod sifatida keladi.
+`MyIdSDK` now comes in transitively through `rn-myid`.
 
-### 2.2. Swift/Obj-C fayllar
+### 2.2. Swift / Obj-C files
 
-O'chiring (loyihada bu nomlar boshqacha bo'lishi mumkin — `MyIdModule`, `MyIDBridge` va h.k. deb qidiring):
+Delete the custom module files (names may differ — look for `MyIdModule`, `MyIDBridge`, etc.):
 
 ```bash
 rm ios/MyIdModule.swift ios/MyIdModule.m
 ```
 
-### 2.3. Xcode project'dan reference'larni olib tashlash
+### 2.3. Remove the Xcode project references
 
-`project.pbxproj` faylda MyIdModule ga ishoralar qoladi → build xato bo'ladi. Ikki variant:
+`project.pbxproj` still references those files and will fail to build. Two options:
 
-**Variant A (avtomatik, ruby gem orqali)**:
+**Option A (automated, ruby gem)**:
 
 ```bash
 ruby -e '
@@ -66,69 +66,69 @@ proj.save
 '
 ```
 
-**Variant B (qo'lda)**: Xcode'da loyihani oching, `MyIdModule.swift` va `MyIdModule.m`'ni Project Navigator'dan o'chiring (Delete → Remove References).
+**Option B (manual)**: open the project in Xcode, find `MyIdModule.swift` and `MyIdModule.m` in the Project Navigator, right-click → Delete → "Remove References".
 
-### 2.4. Podfile.lock'ni yangilash
+### 2.4. Refresh `Podfile.lock`
 
 ```bash
 cd ios && pod install && cd ..
 ```
 
-`Podfile.lock`'da endi `MyIdSDK` `rn-myid` ning dependency'si sifatida ko'rinishi kerak:
+`Podfile.lock` should now list `MyIdSDK` as a dependency of `rn-myid`:
 
 ```
-- rn-myid (1.0.2):
+- rn-myid (1.0.5):
   - MyIdSDK (~> 3.1.3)
 ```
 
 ---
 
-## 3. Eski Android native kodni olib tashlash
+## 3. Remove the legacy Android native code
 
 ### 3.1. Gradle dependencies
 
-`android/app/build.gradle`'dan olib tashlang:
+Delete these lines from `android/app/build.gradle`:
 
 ```gradle
 debugImplementation("uz.myid.sdk.capture:myid-capture-sdk-debug:3.1.5")
 releaseImplementation("uz.myid.sdk.capture:myid-capture-sdk:3.1.5")
 ```
 
-Bular endi `rn-myid`'dan transitively keladi. Artifactory maven repo (`https://artifactory.aigroup.uz:443/artifactory/myid`) ham paket tomondan `rootProject.allprojects { repositories { ... } }` orqali avtomatik qo'shiladi — consumer'ning `android/build.gradle`'iga hech narsa yozishga hojat yo'q.
+They now come in transitively from `rn-myid`. The artifactory maven repo (`https://artifactory.aigroup.uz:443/artifactory/myid`) is injected automatically by the package via `rootProject.allprojects { repositories { ... } }`, so you don't need to add it to the consumer's gradle either.
 
-> **Agar `yarn android` build'da `Could not find uz.myid.sdk.capture:...` xatosi chiqsa** — consumer'ning `android/settings.gradle`'ida `dependencyResolutionManagement.repositoriesMode = FAIL_ON_PROJECT_REPOS` yoqilgan bo'lishi mumkin. Bu holda o'sha fayldagi `dependencyResolutionManagement.repositories` blokiga qo'lda qo'shing:
+> **If `yarn android` still fails with `Could not find uz.myid.sdk.capture:...`** — your `android/settings.gradle` probably has `dependencyResolutionManagement.repositoriesMode = FAIL_ON_PROJECT_REPOS`. In that case, add the repo to the `dependencyResolutionManagement.repositories` block there:
 >
 > ```gradle
 > maven { url "https://artifactory.aigroup.uz:443/artifactory/myid" }
 > ```
 
-### 3.2. Kotlin fayllar
+### 3.2. Kotlin files
 
-O'chiring (nomlar loyihaga qarab farqli bo'lishi mumkin):
+Delete them (paths depend on your app's package namespace):
 
 ```bash
 rm android/app/src/main/java/com/<app-namespace>/MyIdModule.kt
-rm android/app/src/main/java/com/<app-namespace>/ReactPackage.kt   # agar faqat MyID uchun bo'lsa
+rm android/app/src/main/java/com/<app-namespace>/ReactPackage.kt   # only if it contains the MyID registration and nothing else
 ```
 
 ### 3.3. `MainApplication.kt`
 
-Agar `getPackages()` ichida MyID uchun qo'lda `add(MyIdPackage())` yoki `add(ReactPackage())` qatori bo'lsa — olib tashlang. Autolinking `rn-myid`'ni o'zi topadi.
+If `getPackages()` manually adds `MyIdPackage()` or a bare `ReactPackage()` for MyID — remove that line. Autolinking picks `rn-myid` up on its own.
 
 ---
 
-## 4. JS/TS konfiguratsiya
+## 4. JS / TS configuration
 
-### 4.1. MyID config constantlari
+### 4.1. MyID config constants
 
-Loyihangizda `clientHash` va `clientHashId` qayerda saqlanayotganini toping (odatda `src/enums/myId.js` yoki `src/config/`'da). Saqlang. Olib tashlang:
+Find where `clientHash` and `clientHashId` are stored in your project (usually `src/enums/myId.js` or `src/config/`). Keep those; drop:
 
-- `clientId` (hech qachon ishlatilmagan, dead code)
-- `buildMode` (endi kerak emas)
+- `clientId` (never used in practice, dead code)
+- `buildMode` (no longer needed)
 
 ### 4.2. App bootstrap
 
-App'ning eng yuqori joyida (masalan `App.tsx` yoki `src/app/app.model.ts`) module-level'da `MyId.configure()` chaqiring:
+At the top of your app module (e.g. `App.tsx` or `src/app/app.model.ts`) configure MyId once:
 
 ```ts
 import {MyId} from 'rn-myid';
@@ -137,25 +137,25 @@ import {clientHash, clientHashId} from '@/enums/myId';
 MyId.configure({
   clientHash,
   clientHashId,
-  environment: 'production', // MUHIM: __DEV__ bilan bog'lamang!
+  environment: 'production', // IMPORTANT: don't tie this to __DEV__
 });
 ```
 
-> ⚠️ **`environment: __DEV__ ? 'debug' : 'production'` qilmang.** `'debug'` MyID sandbox environmentni tanlaydi. Sizning `sessionId` backend'dan production MyID uchun chiqadi → SDK ochilib darhol yopilib ketadi. Doim `'production'` qoldiring (yoki butunlay tashlab yuboring — default shunday).
+> ⚠️ **Do not write `environment: __DEV__ ? 'debug' : 'production'`.** `'debug'` selects MyID's sandbox backend, but your `sessionId` is issued against production MyID — the SDK will open and dismiss itself immediately, with no `onError` event. Leave it as `'production'` (or omit entirely — that's the default).
 
-### 4.3. MY_ID_EVENTS enum va dead flaglar
+### 4.3. `MY_ID_EVENTS` enum and dead flags
 
-Loyihada `MY_ID_EVENTS` enum fayli bo'lsa (`constants/my-id.ts` yoki shunga o'xshash) — o'chiring. Endi kerak emas.
+If your project has a `MY_ID_EVENTS` enum (in `constants/my-id.ts` or similar) — delete it. It's no longer needed.
 
-`StorageKeys.MY_ID_ENTERED` va unga o'xshash dead flaglar bo'lsa — ularni ham olib tashlang.
+If there are dead storage flags like `StorageKeys.MY_ID_ENTERED` that were set to `false` but never `true` — remove them too.
 
 ---
 
-## 5. Call-site'larni Promise API'ga ko'chirish
+## 5. Migrate call-sites to the Promise API
 
-Har bir `MyIdModule.startMyId(...)` chaqiruvini `MyId.start(...)` Promise API'ga ko'chiring. Pattern:
+Replace every `MyIdModule.startMyId(...)` call-site with `MyId.start(...)`. Pattern:
 
-### Eski kod (olib tashlanadi):
+### Old code (to be removed):
 
 ```ts
 import {NativeEventEmitter, NativeModules} from 'react-native';
@@ -186,7 +186,7 @@ function handleStart() {
 }
 ```
 
-### Yangi kod:
+### New code:
 
 ```ts
 import {MyId, MyIdError} from 'rn-myid';
@@ -196,10 +196,10 @@ async function handleStart() {
   setLoading(true);
   try {
     const {code} = await MyId.start({sessionId, locale: language});
-    await onSuccess(code); // sizning onSuccess logikangiz
+    await onSuccess(code); // your existing onSuccess logic
   } catch (e) {
     if (e instanceof MyIdError && e.kind === 'USER_EXITED') {
-      // user bekor qildi — toast ko'rsating, boshqa hech narsa qilmang
+      // user cancelled — show a toast, do nothing else
       return;
     }
     showMessage({type: 'danger', message: (e as Error).message});
@@ -209,34 +209,34 @@ async function handleStart() {
 }
 ```
 
-**Sezilarli farqlar**:
+**What you get for free**:
 
-- `setTimeout(200)` yo'q — paket o'zi boshqaradi.
-- `NativeEventEmitter` yo'q — Promise lifecycle'ni avtomatik boshqaradi.
-- `useEffect([])` bilan stale-closure bug yo'q.
-- Double-tap himoyasi avtomatik (`ALREADY_RUNNING` error).
-- `USER_EXITED` idiomatik rejection — `if (e.kind === 'USER_EXITED') return`.
+- No `setTimeout(200)` hack — the package handles it.
+- No `NativeEventEmitter` — the Promise lifecycle manages subscriptions.
+- No stale-closure bug from `useEffect([])`.
+- Double-tap protection built in (`ALREADY_RUNNING` error).
+- `USER_EXITED` is an idiomatic rejection: `if (e.kind === 'USER_EXITED') return`.
 
 ---
 
-## 6. Typecheck + Lint
+## 6. Typecheck + lint
 
 ```bash
 yarn tsc --noEmit
 yarn lint
 ```
 
-Agar xatolar chiqsa — odatda import qolib ketgan (`NativeEventEmitter`, `MY_ID_EVENTS`) yoki `MyIdModule` destructuring'ni olib tashlash esdan chiqqan.
+If errors appear they're usually leftover imports (`NativeEventEmitter`, `MY_ID_EVENTS`) or a `const {MyIdModule} = NativeModules` destructuring you forgot to delete.
 
 ---
 
-## 7. Sinash
+## 7. Verify
 
 **iOS**:
 
 ```bash
 yarn ios
-# yoki haqiqiy qurilmada:
+# or on a real device:
 yarn ios:device
 ```
 
@@ -244,20 +244,20 @@ yarn ios:device
 
 ```bash
 yarn android
-# yoki haqiqiy qurilmada:
+# or on a real device:
 adb devices
 yarn android
 ```
 
-Ikkala platformada MyID flowning 3 ta holatini sinang:
+Exercise all three outcomes of the MyID flow on both platforms:
 
-1. **Success** — kod qaytadi, backend sync bo'ladi.
-2. **User exit** — X tugmasini bosing, toast ko'rinadi, ekran joyida qoladi.
-3. **SDK error** — internet uzish yoki boshqa xato, error toast chiqadi.
+1. **Success** — code is returned, backend sync runs.
+2. **User exit** — tap the X button; a toast appears, the screen stays put.
+3. **SDK error** — kill the network or trigger another failure; an error toast appears.
 
 ---
 
-## 8. Commit va PR
+## 8. Commit and PR
 
 ```bash
 git add -A
@@ -265,25 +265,29 @@ git commit -m "refactor: migrate MyID to rn-myid package"
 git push origin feat/migrate-to-rn-myid
 ```
 
-PR ochib review'ga jo'nating. Merge'dan oldin yana bir marta real qurilmada sinash yaxshi odat.
+Open a PR for review. It's a good habit to re-run the on-device test one more time before merge.
 
 ---
 
-## Muammolar
+## Troubleshooting
 
-### `MyId.start` chaqiruvi darhol `UNAVAILABLE` reject bo'ladi
+### `MyId.start` rejects immediately with `UNAVAILABLE`
 
-- iOS: `pod install` qilinmagan yoki app rebuild qilinmagan. `yarn ios`'ni qayta yurgizing.
-- Android: `MainApplication.kt`'da qo'lda `add(ReactPackage())` qoldirib qo'ygansiz va u eski MyID package'ga ishora qilmoqda. O'chiring.
+- iOS: you didn't run `pod install` or didn't rebuild the app. Run `yarn ios` again.
+- Android: you left a stale `add(ReactPackage())` line in `MainApplication.kt` pointing at the removed MyID package. Delete it.
 
-### SDK ochiladi, darhol yopiladi (no error)
+### SDK opens, then closes with no error
 
-`environment: 'debug'` sababli. `MyId.configure`'da `environment: 'production'` ga o'zgartiring.
+Caused by `environment: 'debug'`. Change it to `'production'` in `MyId.configure`.
 
-### iOS build xato: "MyIdModule.swift not found"
+### iOS build error: "MyIdModule.swift not found"
 
-Xcode project'dan reference olib tashlanmagan. 2.3 bo'limni qayta bajaring.
+Xcode project reference still points at the deleted file. Redo step 2.3.
 
-### Android build xato: duplicate MyIdSDK classes
+### Android build error: duplicate MyIdSDK classes
 
-Eski gradle dep qoldi. 3.1 bo'limni tekshiring.
+A gradle dep is still pinning MyID directly. Recheck step 3.1.
+
+### Android runtime error: "Exception in HostObject::get for prop 'RNMyId': ParsingException"
+
+This was fixed in `rn-myid` v1.0.5. Upgrade the consumer: `yarn add rn-myid@github:AbdurakhmonZiyodov/rn-myid#v1.0.5`.
