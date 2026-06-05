@@ -1,7 +1,7 @@
 {
   "name": "rn-myid",
-  "version": "1.0.7",
-  "description": "React Native wrapper for MyID (uz.myid) — Promise-based TurboModule for the 5–8 internal apps.",
+  "version": "1.0.8",
+  "description": "React Native wrapper for the Uzbek MyID identification SDK (uz.myid) — Promise-based TurboModule, new-architecture ready.",
   "main": "lib/commonjs/index.js",
   "module": "lib/module/index.js",
   "types": "lib/typescript/index.d.ts",
@@ -49,7 +49,7 @@
     "url": "git+https://github.com/AbdurakhmonZiyodov/rn-myid.git"
   },
   "author": "AbdurakhmonZiyodov",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "private": false,
   "peerDependencies": {
     "react": ">=18.0.0",

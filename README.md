@@ -156,4 +156,4 @@ cd ios && pod install       # iOS only
 
 ## License
 
-UNLICENSED — internal use only.
+MIT © AbdurakhmonZiyodov — see [LICENSE](./LICENSE).
