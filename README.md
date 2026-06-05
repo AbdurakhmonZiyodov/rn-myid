@@ -13,14 +13,9 @@ React Native wrapper for the Uzbek MyID identification SDK (`uz.myid`). Promise-
 ## Install
 
 ```bash
-yarn add rn-myid@github:AbdurakhmonZiyodov/rn-myid#v1.0.6
+yarn add rn-myid
+# or: npm install rn-myid
 cd ios && pod install
-```
-
-For private installs via SSH:
-
-```json
-"rn-myid": "git+ssh://git@github.com/AbdurakhmonZiyodov/rn-myid.git#v1.0.6"
 ```
 
 The Android Artifactory repository (`https://artifactory.aigroup.uz/artifactory/myid`) is declared inside the library, so consumers do **not** need to add it to their `android/build.gradle`.
@@ -140,15 +135,14 @@ yarn release:dry        # dry-run: shows what would happen, changes nothing
 
 1. `release-it` bumps `version` in `package.json`.
 2. `yarn prepare` runs (bob rebuilds `lib/`).
-3. `scripts/update-readme-version.js` rewrites `rn-myid#vX.Y.Z` snippets in `README.md` to the new version.
-4. All changes are committed as `chore: release v${version}`.
-5. Tag `v${version}` is created.
-6. `main` and the tag are pushed to `origin`.
+3. All changes are committed as `chore: release v${version}`.
+4. Tag `v${version}` is created.
+5. `main` and the tag are pushed to `origin`.
 
 **Then update each consumer**:
 
 ```bash
-yarn add rn-myid@github:AbdurakhmonZiyodov/rn-myid#vX.Y.Z
+yarn add rn-myid@latest     # or pin a version: rn-myid@X.Y.Z
 cd ios && pod install       # iOS only
 ```
 
